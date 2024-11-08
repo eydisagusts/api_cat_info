@@ -19,17 +19,19 @@ const ApiComponent = () => {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const getCatData = useCallback(async () => {
-    try {
-      const rawData = await fetch("https://api.thecatapi.com/v1/images/search?limit=9");
+    try { 
+      const rawData = await fetch("https://api.thecatapi.com/v1/images/search?limit=9"); // Shrek API gekk brösulega, fékk bara corse og unauthenticated errors. Er þá bara með cats api.
       if (!rawData.ok) {
         throw new Error(`Something went wrong, error code: ${rawData.status}`);
       }
       const parsedData = await rawData.json();
 
+      // Cat API var með .gif files eða slíkt, vildi filtera það út svo að ég fái bara myndir.
       const filteredData = parsedData.filter((cat: { url: string }) => 
         cat.url.endsWith('.png') || cat.url.endsWith('.jpg') || cat.url.endsWith('.jpeg')
       );
 
+      // limit=9 virkaði ekki, fékk alltaf 10 myndir sama hvað. Prófaði þá að nota slice og þá gekk þetta.
       setCatValues(filteredData.slice(0, 9).map((cat: { url: string; id: string }) => ({ ...cat, fact: null })));
     } catch (e) {
       console.error('Error: ', e);
@@ -42,7 +44,7 @@ const ApiComponent = () => {
 
   const getCatFacts = useCallback(async () => {
     try {
-      const catFactsRawData = await fetch('https://catfact.ninja/fact?max_length=50');
+      const catFactsRawData = await fetch('https://catfact.ninja/fact?max_length=50'); // í assignment þá settiru held ég óvart Shrek API-inn í bæði cat facts og shrek images. Þannig að ég fann bara einhvern cat facts api og notaði hann. Veit ekki hvort að þetta sé sá sami og þú varst með.
       if (!catFactsRawData.ok) {
         throw new Error(`Something went wrong, error code: ${catFactsRawData.status}`);
       }
@@ -67,6 +69,7 @@ const ApiComponent = () => {
     }
   };
 
+  // Gerði fyrst (!catValues) en þá hvarf Loading... textinn, kemur bara upp ef ég set þetta upp svona. Væri gaman að heyra ef þú hefur einhver comment á það
   if (catValues.length === 0) { 
     return (
       <div className="text-2xl flex items-center justify-center mt-52">
